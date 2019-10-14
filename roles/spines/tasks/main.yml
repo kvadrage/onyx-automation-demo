@@ -1,0 +1,66 @@
+---					
+
+
+- name: set facts
+  set_fact:
+    ifaces: "{{ ifaces|default([]) + [ {'name': 'Eth1/'+item, 'description': 'to_leaf'+item, 'speed': '40G', 'mtu': '9216'} ] }}"
+    l3ifaces: "{{ l3ifaces|default([]) + [ {'name': 'Eth1/'+item, 'ipv4': '10.0.'+node.id|string+'.'+((item|int-1)*2)|string+'/31'} ] }}"
+    neighbors: "{{ neighbors|default([]) + [ {'remote_as': 65010+item|int, 'neighbor': '10.0.'+node.id|string+'.'+((item|int-1)*2+1)|string} ] }}"
+  with_items: "{{ node.downlinks }}"
+  tags:
+    - bgp
+
+- name: set facts loopback  
+  set_fact:
+    l3ifaces: "{{ l3ifaces|default([]) + [ {'name': 'Loopback 0', 'ipv4': node.rid+'/32'} ] }}"
+
+- name: configure protocols			          
+  onyx_protocol:				
+    ip_routing: enabled			
+    bgp: enabled				
+    lldp: enabled
+  when: fabric_clear is undefined
+  tags:
+    - bgp
+
+- name: clear protocols			          
+  onyx_protocol:				
+    bgp: disabled				
+  when: fabric_clear is defined
+
+- name: configure physical interfaces			
+  onyx_interface:
+    aggregate: "{{ ifaces }}"
+    state: up
+  when: fabric_clear is undefined
+
+- name: enable L3 interfaces
+  onyx_config:				
+     lines:					
+       - interface ethernet 1/{{ node.downlinks|min }}-1/{{ node.downlinks|max }} no switchport force	
+  when: fabric_clear is undefined				
+       
+- name: configure L3 interfaces
+  onyx_l3_interface:
+    aggregate: "{{ l3ifaces }}"
+    state: present
+  when: fabric_clear is undefined	
+
+- name: clear L3 interfaces
+  onyx_config:				
+     lines:	
+       - no interface loopback 0
+       - "interface ethernet 1/{{ node.downlinks|min }}-1/{{ node.downlinks|max }} switchport force"
+  when: fabric_clear is defined
+
+- name: configure bgp router			
+  onyx_bgp:				
+    as_number: "{{ node.bgp.local_as }}"
+    router_id: "{{ node.rid }}"  
+    neighbors: "{{ neighbors }}"
+    networks:				
+      - "{{ node.rid + '/32' }}"
+    state: present	
+  when: fabric_clear is undefined
+  tags:
+    - bgp

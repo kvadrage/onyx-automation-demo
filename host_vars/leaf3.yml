@@ -1,0 +1,25 @@
+node:
+  id: 3
+  rid: 10.0.255.13
+
+  uplink1:
+    num: 1/15
+    ip: 10.0.1.5/31
+
+  uplink2:
+    num: 1/16
+    ip: 10.0.2.5/31
+
+  ipl:
+    vlan: 4093
+    local_ip: 10.0.3.2/31
+    peer_ip: 10.0.3.3
+
+  bgp:
+    local_as: 65013
+    peer_as: 65014
+    spine_as: 65020
+    networks:
+      - 10.0.255.13/32
+      - 10.1.30.0/24
+      - 10.1.40.0/24

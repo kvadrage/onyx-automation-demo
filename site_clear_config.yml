@@ -1,0 +1,28 @@
+---					
+
+- name: clear configuration for on all switches		          
+  hosts: spine2		
+  connection: network_cli			
+  gather_facts: no				
+  become: yes				
+  become_method: enable			
+  vars:					
+    ansible_network_os: onyx
+  ignore_errors: yes			
+  tasks:
+    - onyx_config:
+        lines:
+          - configuration new temp
+    - onyx_config:
+        lines:
+          - configuration switch-to temp no-reboot
+    - onyx_config:
+        lines:
+          - configuration copy temp initial
+    - onyx_config:
+        lines:
+          - configuration switch-to initial no-reboot
+    - onyx_config:
+        lines:
+          - configuration delete temp
+          # - configuration write

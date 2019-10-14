@@ -1,0 +1,10 @@
+# This is the default ansible 'hosts' file.
+
+[leafs]
+leaf1  ansible_host=10.0.0.11       ansible_ssh_user=admin   ansible_ssh_pass=admin
+leaf2  ansible_host=10.0.0.12       ansible_ssh_user=admin   ansible_ssh_pass=admin
+leaf3  ansible_host=10.0.0.13       ansible_ssh_user=admin   ansible_ssh_pass=admin
+
+[spines]
+spine1  ansible_host=10.0.0.21      ansible_ssh_user=admin   ansible_ssh_pass=admin
+spine2  ansible_host=10.0.0.22      ansible_ssh_user=admin   ansible_ssh_pass=admin

@@ -1,0 +1,17 @@
+---					
+
+- name: gather facts from all switches		          
+  hosts: all		
+  connection: network_cli			
+  gather_facts: no				
+  become: yes				
+  become_method: enable			
+  vars:					
+    ansible_network_os: onyx			
+  tasks:
+    - name: gather facts
+      onyx_facts:
+        gather_subset:
+          - version
+    - debug:
+        msg: "{{inventory_hostname}}: {{ansible_net_version['Product release']}}"

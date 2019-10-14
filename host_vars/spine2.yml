@@ -1,0 +1,7 @@
+node:
+  id: 2
+  rid: 10.0.255.22
+  downlinks: ['1','2','3']
+
+  bgp:
+    local_as: 65020

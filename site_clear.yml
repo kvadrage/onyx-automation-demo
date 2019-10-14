@@ -1,0 +1,6 @@
+---					
+
+- name: clear fabric          	
+  vars:					
+    fabric_clear: true			
+  include: site_deploy.yml
