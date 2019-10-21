@@ -75,3 +75,28 @@
   when: fabric_clear is undefined
   tags:
     - bgp
+
+- name: configure bgp peer groups
+  onyx_config:				
+     lines:
+       - "protocol bfd"
+       - "router bgp {{ node.bgp.local_as }} neighbor spines peer-group"
+       - "router bgp {{ node.bgp.local_as }} neighbor spines fall-over bfd"
+       - "router bgp {{ node.bgp.local_as }} neighbor spines timers 3 9"
+       - "router bgp {{ node.bgp.local_as }} neighbor spines allowas-in"
+       - "router bgp {{ node.bgp.local_as }} neighbor peer peer-group"
+       - "router bgp {{ node.bgp.local_as }} neighbor peer fall-over bfd"
+       - "router bgp {{ node.bgp.local_as }} neighbor peer timers 3 9"
+  when: fabric_clear is undefined
+  tags:
+    - bgp
+
+- name: configure bgp neighbors extra			
+  onyx_config:				
+     lines:	
+       - "router bgp {{ node.bgp.local_as }} neighbor {{ node.uplink1.ip | ipaddr('network') }} peer-group spines"
+       - "router bgp {{ node.bgp.local_as }} neighbor {{ node.uplink2.ip | ipaddr('network') }} peer-group spines"
+       - "router bgp {{ node.bgp.local_as }} neighbor {{ node.ipl.peer_ip | ipaddr('address') }} peer-group peer"
+  when: fabric_clear is undefined
+  tags:
+    - bgp

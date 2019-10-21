@@ -16,8 +16,8 @@
 
 - name: configure protocols			          
   onyx_protocol:				
-    ip_routing: enabled			
-    bgp: enabled				
+    ip_routing: enabled	
+    bgp: enabled		
     lldp: enabled
   when: fabric_clear is undefined
   tags:
@@ -31,7 +31,7 @@
 - name: configure physical interfaces			
   onyx_interface:
     aggregate: "{{ ifaces }}"
-    state: up
+    state: present
   when: fabric_clear is undefined
 
 - name: enable L3 interfaces
@@ -53,7 +53,7 @@
        - "interface ethernet 1/{{ node.downlinks|min }}-1/{{ node.downlinks|max }} switchport force"
   when: fabric_clear is defined
 
-- name: configure bgp router			
+- name: configure bgp neighbors			
   onyx_bgp:				
     as_number: "{{ node.bgp.local_as }}"
     router_id: "{{ node.rid }}"  
@@ -62,5 +62,25 @@
       - "{{ node.rid + '/32' }}"
     state: present	
   when: fabric_clear is undefined
+  tags:
+    - bgp
+
+- name: configure bgp peer groups
+  onyx_config:				
+     lines:
+       - "protocol bfd"
+       - "router bgp {{ node.bgp.local_as }} neighbor leafs peer-group"
+       - "router bgp {{ node.bgp.local_as }} neighbor leafs fall-over bfd"
+       - "router bgp {{ node.bgp.local_as }} neighbor leafs timers 3 9"
+  when: fabric_clear is undefined
+  tags:
+    - bgp
+
+- name: configure bgp neighbors extra			
+  onyx_config:				
+     lines:	
+       - "router bgp {{ node.bgp.local_as }} neighbor {{ item.neighbor }} peer-group leafs"
+  when: fabric_clear is undefined
+  with_items: "{{ neighbors }}"
   tags:
     - bgp
